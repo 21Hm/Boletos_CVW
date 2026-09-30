@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --azul:#13294B; --azul-2:#1F3F6E; --oro:#C9A227; --papel:#F3F5F9;
+    --tinta:#1A2230; --suave:#5C6679; --linea:#D5DBE5; --error:#B3261E; --ok:#1E7A46;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Archivo,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--papel);color:var(--tinta);line-height:1.5}
+  .wrap{max-width:640px;margin:0 auto;padding:28px 16px 48px}
+
+  header{background:var(--azul);color:#fff;border-radius:14px 14px 0 0;padding:26px 24px 22px;position:relative}
+  header h1{margin:0;font-size:1.75rem;font-weight:800;letter-spacing:-.01em}
+  header p{margin:4px 0 0;color:#C8D3E6}
+  .etapa{display:inline-block;margin-top:12px;background:var(--oro);color:var(--azul);font-weight:700;font-size:.85rem;padding:4px 12px;border-radius:999px}
+  .etapa:empty{display:none}
+  #cerrado{display:none;background:#fff;border-radius:14px;padding:32px 24px;text-align:center;border:1px solid var(--linea)}
+  #cerrado h2{color:var(--azul);margin:0 0 8px}
+  /* borde perforado tipo talón de boleto */
+  .perforado{height:14px;background:
+    radial-gradient(circle at 7px 0,var(--papel) 6px,transparent 6.5px) 0 0/14px 14px repeat-x,var(--azul);}
+
+  details{background:#fff;border:1px solid var(--linea);border-top:none}
+  details:last-of-type{border-radius:0 0 14px 14px}
+  summary{list-style:none;cursor:pointer;padding:18px 22px;display:flex;align-items:center;gap:14px;font-weight:600;font-size:1.05rem}
+  summary::-webkit-details-marker{display:none}
+  summary:focus-visible{outline:3px solid var(--oro);outline-offset:-3px}
+  .paso{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--azul);color:var(--azul);font-size:.9rem}
+  .hecho .paso{background:var(--ok);border-color:var(--ok);color:#fff}
+  .flecha{margin-left:auto;transition:transform .2s;color:var(--suave)}
+  details[open] .flecha{transform:rotate(180deg)}
+  .cuerpo{padding:0 22px 22px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:480px){.grid{grid-template-columns:1fr}}
+  label{display:block;font-size:.88rem;font-weight:500;color:var(--suave);margin-bottom:5px}
+  input,select{width:100%;font:inherit;padding:11px 12px;border:1.5px solid var(--linea);border-radius:8px;background:#fff;color:var(--tinta)}
+  input:focus,select:focus{outline:none;border-color:var(--azul-2);box-shadow:0 0 0 3px rgba(31,63,110,.15)}
+  input.invalido,select.invalido{border-color:var(--error)}
+  select:disabled{background:var(--papel);color:var(--suave)}
+  .msg{font-size:.82rem;color:var(--error);min-height:1.1em;margin-top:3px}
+
+  .talon{margin-top:18px;border:2px dashed var(--linea);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;row-gap:4px}
+  .talon span{color:var(--suave)}
+  .talon strong{text-align:right}
+  .talon .total{font-size:1.5rem;font-weight:800;color:var(--azul)}
+
+  .aviso{color:var(--suave);background:var(--papel);border-radius:8px;padding:14px 16px;margin:0}
+  .pago-img{display:block;max-width:280px;width:100%;margin:0 auto 16px;border-radius:8px;border:1px solid var(--linea)}
+  .pago-nota{margin:0 0 10px;font-size:.92rem;color:var(--tinta);background:#FBF6E6;border:1px solid #EADBA8;border-radius:8px;padding:12px 14px}
+  .pago-link{display:block;text-align:center;background:var(--oro);color:var(--azul);font-weight:700;text-decoration:none;padding:13px;border-radius:8px;margin-bottom:16px}
+  .pago-link:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
+  .resumen{white-space:pre-line;background:var(--papel);border-left:4px solid var(--oro);padding:14px 16px;border-radius:0 8px 8px 0;margin:0}
+  .datos{white-space:pre-line;font-weight:500;margin:0 0 16px}
+
+  .contador{font-size:.8rem;color:var(--suave);text-align:right;margin-top:3px}
+
+  /* Comprobante: clave o foto */
+  .ayuda{font-size:.88rem;color:var(--suave);margin:0 0 14px}
+  .separador{display:flex;align-items:center;gap:12px;color:var(--suave);font-size:.88rem;margin:8px 0 14px}
+  .separador::before,.separador::after{content:"";flex:1;border-top:1px solid var(--linea)}
+  .subir{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border:1.5px dashed var(--azul-2);border-radius:8px;color:var(--azul);font-weight:600;cursor:pointer;background:#fff;margin:0}
+  .subir:focus-within{outline:3px solid var(--oro);outline-offset:2px}
+  .subir input{position:absolute;width:1px;height:1px;opacity:0}
+  .vista{display:none;align-items:center;gap:12px;border:1.5px solid var(--ok);border-radius:8px;padding:10px}
+  .vista img{width:64px;height:64px;object-fit:cover;border-radius:6px;flex:none}
+  .vista span{flex:1;font-size:.9rem;word-break:break-all}
+  .vista button{font:inherit;font-size:.88rem;border:none;background:none;color:var(--error);cursor:pointer;padding:6px;text-decoration:underline}
+
+  #terminar{margin-top:22px;width:100%;font:inherit;font-weight:700;font-size:1.05rem;padding:15px;border:none;border-radius:10px;background:var(--azul);color:#fff;cursor:pointer}
+  #terminar:disabled{background:#9AA6BA;cursor:not-allowed}
+  #terminar:focus-visible{outline:3px solid var(--oro);outline-offset:2px}
+  #estado{text-align:center;margin-top:12px;min-height:1.4em}
+  #estado.error{color:var(--error)}
+
+  #exito{display:none;background:#fff;border-radius:14px;padding:32px 24px;text-align:center;border:1px solid var(--linea)}
+  #exito h2{color:var(--ok);margin:0 0 8px}
+  #exito button{margin-top:18px;font:inherit;font-weight:600;padding:11px 20px;border-radius:8px;border:1.5px solid var(--azul);background:#fff;color:var(--azul);cursor:pointer}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="portal">
+    <header>
+      <h1>Compra de boletos</h1>
+      <p>Llena las cuatro secciones y presiona Terminar.</p>
+      <span class="etapa" id="etapaTxt"></span>
+    </header>
+    <div class="perforado" aria-hidden="true"></div>
+
+    <!-- SECCIÓN 1 -->
+    <details id="sec1" open>
+      <summary><span class="paso">1</span>Datos del comprador<span class="flecha">▾</span></summary>
+      <div class="cuerpo">
+        <div class="grid">
+          <div><label for="nombres">Nombres</label><input id="nombres" autocomplete="given-name"><div class="msg"></div></div>
+          <div><label for="apellidos">Apellidos</label><input id="apellidos" autocomplete="family-name"><div class="msg"></div></div>
+          <div><label for="telefono">Número telefónico</label><input id="telefono" inputmode="numeric" maxlength="10" autocomplete="tel-national" placeholder="10 dígitos"><div class="msg"></div></div>
+          <div><label for="telefono2">Confirma tu número</label><input id="telefono2" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="10 dígitos"><div class="msg"></div></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- SECCIÓN 2 -->
+    <details id="sec2">
+      <summary><span class="paso">2</span>Orden de compra<span class="flecha">▾</span></summary>
+      <div class="cuerpo">
+        <div class="grid">
+          <div>
+            <label for="tipoBoleto">Tipo de boleto</label>
+            <select id="tipoBoleto">
+              <option value="">Selecciona…</option>
+              <option value="UADY">FCA - UADY</option>
+              <option value="EXTERNO">Externo</option>
+            </select>
+          </div>
+          <div>
+            <label for="tipoPago">Tipo de pago</label>
+            <select id="tipoPago">
+              <option value="">Selecciona…</option>
+              <option value="CODI">CODI</option>
+              <option value="TRANSFERENCIA">Transferencia</option>
+              <option value="TARJETA">Tarjeta débito/crédito</option>
+              <option value="EFECTIVO">Efectivo</option>
+            </select>
+          </div>
+          <div>
+            <label for="cantidad">Cantidad de boletos</label>
+            <select id="cantidad" disabled><option value="">Elige el tipo de boleto</option></select>
+          </div>
+        </div>
+        <div class="talon" aria-live="polite">
+          <span>Costo por boleto</span><strong id="costo">—</strong>
+          <span>Total a pagar</span><strong id="total" class="total">—</strong>
+        </div>
+      </div>
+    </details>
+
+    <!-- SECCIÓN 3 -->
+    <details id="sec3">
+      <summary><span class="paso">3</span>Pago<span class="flecha">▾</span></summary>
+      <div class="cuerpo" id="infoPago" aria-live="polite">
+        <p class="aviso">Por favor completa las secciones anteriores.</p>
+      </div>
+    </details>
+
+    <!-- SECCIÓN 4 -->
+    <details id="sec4">
+      <summary><span class="paso">4</span>Comprobante<span class="flecha">▾</span></summary>
+      <div class="cuerpo">
+        <p class="ayuda">Solo necesitas uno de los dos: la clave o la foto de tu comprobante.</p>
+
+        <label for="clave" id="claveLabel">Por favor ingresa la clave de rastreo de tu pago</label>
+        <input id="clave" maxlength="18" autocomplete="off" spellcheck="false" style="text-transform:uppercase">
+        <div class="contador"><span id="cuenta">0</span> / <span id="limite">18</span></div>
+        <div class="msg"></div>
+
+        <div class="separador">o bien</div>
+
+        <label class="subir" id="subirBox">
+          <input type="file" id="foto" accept="image/*">
+          Subir foto del comprobante
+        </label>
+        <div class="vista" id="vista">
+          <img id="vistaImg" alt="Vista previa del comprobante">
+          <span id="vistaNombre"></span>
+          <button type="button" id="quitarFoto">Quitar</button>
+        </div>
+        <div class="msg" id="fotoMsg"></div>
+      </div>
+    </details>
+
+    <button id="terminar" disabled>Terminar</button>
+    <div id="estado" role="status"></div>
+  </div>
+
+  <div id="cerrado" role="status">
+    <h2>La venta en línea ha cerrado</h2>
+    <p>Gracias por tu interés. Para más información comunícate con los organizadores del evento.</p>
+  </div>
+
+  <div id="exito" role="status">
+    <h2>Compra registrada</h2>
+    <p id="exitoTexto"></p>
+    <button type="button" id="otraCompra">Comprar otro boleto</button>
+  </div>
+</div>
+
+<script>
+  // ───── Conexión con Apps Script ─────
+  // Pega aquí el link /exec de tu implementación de Apps Script (App web).
+  const API_URL = 'https://script.google.com/macros/s/AKfycbx0bs0NYUV_hjEJcw-O3QvjUMWO0ejDAKFIm6jij3BUG_WUjEM8Dux5WPzPwjghjrfXqg/exec';
+
+  // Se envía como texto simple y sin cookies, para que la sesión de Google del comprador no intervenga.
+  async function api(accion, datos){
+    let res;
+    try {
+      res = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(Object.assign({ accion: accion }, datos || {})),
+        credentials: 'omit',
+        redirect: 'follow'
+      });
+    } catch (e) {
+      throw new Error('No se pudo conectar. Revisa tu conexión a internet e intenta de nuevo.');
+    }
+    let j;
+    try { j = await res.json(); }
+    catch (e) { throw new Error('Hay muchas compras en este momento. Espera unos segundos e intenta de nuevo.'); }
+    if (!j.ok) throw new Error(j.error);
+    return j.data;
+  }
+
+  let PRECIOS = null;   // llegan del servidor según la etapa vigente
+  let cotizacion = null; // etapa con la que se le mostró el precio al comprador
+  const LONGITUD_CLAVE = 18;       // CODI, transferencia, efectivo
+  const LONGITUD_ORDEN_CLIP = 12;  // tarjeta (CLIP)
+  const LEYENDA_CLIP = 'Serás redireccionado a la página de CLIP. Al realizar tu pago, da clic en VER RECIBO, copia el número de ORDEN y regresa aquí para terminar tu orden de compra.';
+  const $ = id => document.getElementById(id);
+  const dinero = n => '$' + n.toLocaleString('es-MX');
+
+  let infoPagoCargada = false;
+  let consultaActual = 0;
+  let foto = null; // { base64, mimeType }
+
+  // ───── Validaciones ─────
+  function marcar(input, mensaje){
+    const msg = input.parentElement.querySelector('.msg');
+    input.classList.toggle('invalido', !!mensaje);
+    if (msg) msg.textContent = mensaje || '';
+  }
+
+  function validarSec1(mostrar){
+    const n = $('nombres'), a = $('apellidos'), t = $('telefono'), t2 = $('telefono2');
+    const errs = {
+      n: n.value.trim() ? '' : 'Escribe tu(s) nombre(s).',
+      a: a.value.trim() ? '' : 'Escribe tus apellidos.',
+      t: /^\d{10}$/.test(t.value) ? '' : 'Debe tener 10 dígitos.',
+      t2: !/^\d{10}$/.test(t2.value) ? 'Debe tener 10 dígitos.' : (t2.value !== t.value ? 'Los números no coinciden.' : '')
+    };
+    if (mostrar){
+      if (mostrar === true || mostrar === n) marcar(n, errs.n);
+      if (mostrar === true || mostrar === a) marcar(a, errs.a);
+      if (mostrar === true || mostrar === t) marcar(t, errs.t);
+      if (mostrar === true || mostrar === t2 || (mostrar === t && t2.value)) marcar(t2, errs.t2);
+    }
+    return !errs.n && !errs.a && !errs.t && !errs.t2;
+  }
+
+  const validarSec2 = () => $('tipoBoleto').value && $('tipoPago').value && $('cantidad').value;
+
+  // Reglas de la clave según el tipo de pago
+  const esTarjeta = () => $('tipoPago').value === 'TARJETA';
+  const limiteClave = () => esTarjeta() ? LONGITUD_ORDEN_CLIP : LONGITUD_CLAVE;
+  function claveValida(){
+    const v = $('clave').value.trim().toUpperCase();
+    return esTarjeta() ? new RegExp('^\\d{' + LONGITUD_ORDEN_CLIP + '}$').test(v)
+                       : new RegExp('^[A-Z0-9]{' + LONGITUD_CLAVE + '}$').test(v);
+  }
+  function mensajeClave(){
+    return esTarjeta() ? 'El número de ORDEN debe tener ' + LONGITUD_ORDEN_CLIP + ' dígitos.'
+                       : 'La clave debe tener ' + LONGITUD_CLAVE + ' caracteres.';
+  }
+
+  // Sección 4 completa: clave válida O foto. Si hay foto y la clave está a medias, se pide completarla o borrarla.
+  function validarSec4(){
+    const hayClave = $('clave').value.trim() !== '';
+    if (hayClave && !claveValida()) return false;
+    return hayClave || !!foto;
+  }
+
+  function actualizarEstado(){
+    const s1 = validarSec1(false), s2 = !!validarSec2(), s3 = s2 && infoPagoCargada, s4 = validarSec4();
+    $('sec1').classList.toggle('hecho', s1);
+    $('sec2').classList.toggle('hecho', s2);
+    $('sec3').classList.toggle('hecho', s3);
+    $('sec4').classList.toggle('hecho', s4);
+    $('terminar').disabled = !(s1 && s2 && s3 && s4);
+  }
+
+  // ───── Sección 1 ─────
+  ['nombres','apellidos','telefono','telefono2'].forEach(id => {
+    const el = $(id);
+    el.addEventListener('input', () => {
+      if (id.startsWith('telefono')) el.value = el.value.replace(/\D/g,'').slice(0,10);
+      if (el.classList.contains('invalido')) validarSec1(el);
+      actualizarEstado();
+    });
+    el.addEventListener('blur', () => { if (el.value) validarSec1(el); });
+  });
+
+  // ───── Sección 2 ─────
+  function llenarCantidad(){
+    const tipo = $('tipoBoleto').value, sel = $('cantidad');
+    const anterior = sel.value;
+    sel.innerHTML = '';
+    if (!tipo){
+      sel.innerHTML = '<option value="">Elige el tipo de boleto</option>';
+      sel.disabled = true; return;
+    }
+    const max = tipo === 'UADY' ? 1 : 10;
+    for (let i = 1; i <= max; i++) sel.add(new Option(i, i));
+    sel.disabled = tipo === 'UADY';
+    sel.value = (anterior && Number(anterior) <= max) ? anterior : '1';
+  }
+
+  function calcularTotales(){
+    const tipo = $('tipoBoleto').value, pago = $('tipoPago').value, cant = Number($('cantidad').value);
+    if (!tipo || !pago || !PRECIOS){ $('costo').textContent = '—'; $('total').textContent = '—'; return; }
+    const precio = pago === 'TARJETA' ? PRECIOS[tipo].tarjeta : PRECIOS[tipo].otro;
+    $('costo').textContent = dinero(precio);
+    $('total').textContent = cant ? dinero(precio * cant) : '—';
+  }
+
+  $('tipoBoleto').addEventListener('change', () => { llenarCantidad(); cambioOrden(); });
+  $('tipoPago').addEventListener('change', () => { ajustarCampoClave(); cambioOrden(); });
+  $('cantidad').addEventListener('change', cambioOrden);
+
+  function cambioOrden(){
+    calcularTotales();
+    cargarInfoPago();
+    actualizarEstado();
+  }
+
+  // ───── Sección 3 ─────
+  function cargarInfoPago(){
+    const cont = $('infoPago');
+    infoPagoCargada = false;
+    cotizacion = null;
+    if (!validarSec2()){
+      cont.innerHTML = '<p class="aviso">Por favor completa las secciones anteriores.</p>';
+      return;
+    }
+    const id = ++consultaActual;
+    cont.innerHTML = '<p class="aviso">Cargando datos de pago…</p>';
+    api('infoPago', { tipoBoleto: $('tipoBoleto').value, tipoPago: $('tipoPago').value, cantidad: Number($('cantidad').value) })
+      .then(r => { if (id === consultaActual) pintarInfoPago(r); })
+      .catch(e => {
+        if (id !== consultaActual) return;
+        if (e.message.indexOf('VENTA_CERRADA') !== -1) return mostrarCerrado();
+        cont.innerHTML = '<p class="aviso" style="color:var(--error)">No se pudieron cargar los datos de pago: ' + escapar(e.message) + '</p>';
+      });
+  }
+
+  function pintarInfoPago(r){
+    const cont = $('infoPago');
+    // Si la etapa cambió mientras llenaba el formulario, se actualizan precios y talón
+    aplicarEtapa(r.etapa, r.precios);
+    $('costo').textContent = dinero(r.precio);
+    $('total').textContent = dinero(r.total);
+    cotizacion = r.cotizacion;
+    let html = '';
+    if (r.dato){
+      if (r.dato.tipo === 'imagen') html += '<img class="pago-img" alt="Código o datos para realizar tu pago" src="' + escapar(r.dato.url) + '">';
+      else if (r.dato.tipo === 'link') html += '<p class="pago-nota">' + escapar(LEYENDA_CLIP) + '</p>' +
+        '<a class="pago-link" target="_blank" rel="noopener" href="' + escapar(r.dato.url) + '">Pagar con tarjeta</a>';
+      else if (r.dato.tipo === 'texto') html += '<p class="datos">' + escapar(r.dato.texto) + '</p>';
+    }
+    html += r.resumen ? '<p class="resumen">' + escapar(r.resumen) + '</p>'
+                      : '<p class="aviso">Total a pagar: ' + dinero(r.total) + '</p>';
+    cont.innerHTML = html;
+    infoPagoCargada = true;
+    $('sec3').open = true;
+    actualizarEstado();
+  }
+
+  // ───── Sección 4 ─────
+  function ajustarCampoClave(){
+    const clave = $('clave');
+    $('claveLabel').textContent = esTarjeta()
+      ? 'Por favor ingresa el número de ORDEN de tu pago con CLIP'
+      : 'Por favor ingresa la clave de rastreo de tu pago';
+    clave.maxLength = limiteClave();
+    clave.inputMode = esTarjeta() ? 'numeric' : 'text';
+    $('limite').textContent = limiteClave();
+    $('cuenta').textContent = clave.value.length;
+    marcar(clave, clave.value && !claveValida() ? mensajeClave() : '');
+  }
+
+  $('clave').addEventListener('input', e => {
+    const patron = esTarjeta() ? /\D/g : /[^a-zA-Z0-9]/g;
+    e.target.value = e.target.value.replace(patron,'').slice(0, limiteClave());
+    $('cuenta').textContent = e.target.value.length;
+    marcar(e.target, '');
+    actualizarEstado();
+  });
+  $('clave').addEventListener('blur', e => {
+    if (e.target.value && !claveValida()) marcar(e.target, mensajeClave() + (foto ? ' Complétala o bórrala.' : ''));
+  });
+
+  // Foto desde galería: se reduce a máx. 1000 px (límite de imágenes de Google Sheets)
+  $('foto').addEventListener('change', async e => {
+    const archivo = e.target.files[0];
+    $('fotoMsg').textContent = '';
+    if (!archivo) return;
+    if (!archivo.type.startsWith('image/')){ $('fotoMsg').textContent = 'Selecciona una imagen.'; e.target.value=''; return; }
+    try {
+      const dataUrl = await comprimirImagen(archivo, 1000, 0.75);
+      foto = { base64: dataUrl.split(',')[1], mimeType: 'image/jpeg' };
+      $('vistaImg').src = dataUrl;
+      $('vistaNombre').textContent = archivo.name;
+      $('vista').style.display = 'flex';
+      $('subirBox').style.display = 'none';
+    } catch(err){
+      foto = null;
+      $('fotoMsg').textContent = 'No se pudo leer la imagen. Intenta con otra foto.';
+    }
+    e.target.value = '';
+    actualizarEstado();
+  });
+
+  $('quitarFoto').addEventListener('click', () => {
+    foto = null;
+    $('vista').style.display = 'none';
+    $('subirBox').style.display = 'flex';
+    actualizarEstado();
+  });
+
+  function comprimirImagen(archivo, maxLado, calidad){
+    return new Promise((resolve, reject) => {
+      const lector = new FileReader();
+      lector.onerror = reject;
+      lector.onload = () => {
+        const img = new Image();
+        img.onerror = reject;
+        img.onload = () => {
+          const escala = Math.min(1, maxLado / Math.max(img.width, img.height));
+          const c = document.createElement('canvas');
+          c.width = Math.round(img.width * escala);
+          c.height = Math.round(img.height * escala);
+          const ctx = c.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL('image/jpeg', calidad));
+        };
+        img.src = lector.result;
+      };
+      lector.readAsDataURL(archivo);
+    });
+  }
+
+  // ───── Terminar ─────
+  $('terminar').addEventListener('click', () => {
+    validarSec1(true);
+    if ($('terminar').disabled) return;
+    const btn = $('terminar'), estado = $('estado');
+    btn.disabled = true; btn.textContent = 'Registrando…';
+    estado.className = ''; estado.textContent = '';
+
+    const datos = {
+      nombres: $('nombres').value.trim(),
+      apellidos: $('apellidos').value.trim(),
+      telefono: $('telefono').value,
+      telefonoConfirmacion: $('telefono2').value,
+      tipoBoleto: $('tipoBoleto').value,
+      tipoPago: $('tipoPago').value,
+      cantidad: Number($('cantidad').value),
+      claveRastreo: $('clave').value.trim().toUpperCase(),
+      foto: foto,
+      cotizacion: cotizacion
+    };
+
+    api('registrar', { datos: datos })
+      .then(r => {
+        $('portal').style.display = 'none';
+        $('exito').style.display = 'block';
+        $('exitoTexto').textContent = 'Registramos ' + r.cantidad + (r.cantidad === 1 ? ' boleto' : ' boletos') +
+          ' a nombre de ' + datos.nombres + ' ' + datos.apellidos + ' por un total de ' + dinero(r.total) + '.';
+      })
+      .catch(e => {
+        btn.textContent = 'Terminar'; actualizarEstado();
+        estado.className = 'error'; estado.textContent = e.message;
+      });
+  });
+
+  function escapar(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ───── Etapa de venta ─────
+  function aplicarEtapa(etapa, precios){
+    PRECIOS = precios;
+    const NOMBRES_ETAPA = { 1: 'Preventa', 2: 'Preferente', 3: 'Regular' };
+    $('etapaTxt').textContent = NOMBRES_ETAPA[etapa] || '';
+    calcularTotales();
+  }
+
+  function mostrarCerrado(){
+    $('portal').style.display = 'none';
+    $('exito').style.display = 'none';
+    $('cerrado').style.display = 'block';
+  }
+
+  function cargarEstadoVenta(){
+    api('estado')
+      .then(r => { if (!r.abierta) return mostrarCerrado(); aplicarEtapa(r.etapa, r.precios); })
+      .catch(() => {});  // si falla, los precios llegan igual al cargar la sección 3
+  }
+
+  // ───── Comprar otro boleto ─────
+  // Limpia el formulario sin recargar la página
+  function reiniciarFormulario(){
+    ['nombres','apellidos','telefono','telefono2','clave'].forEach(id => { $(id).value = ''; marcar($(id), ''); });
+    $('tipoBoleto').value = '';
+    $('tipoPago').value = '';
+    llenarCantidad();
+
+    foto = null;
+    $('vista').style.display = 'none';
+    $('subirBox').style.display = 'flex';
+    $('fotoMsg').textContent = '';
+    ajustarCampoClave();
+    $('cuenta').textContent = '0';
+
+    cotizacion = null;
+    infoPagoCargada = false;
+    consultaActual++;
+    $('infoPago').innerHTML = '<p class="aviso">Por favor completa las secciones anteriores.</p>';
+    calcularTotales();
+
+    $('terminar').textContent = 'Terminar';
+    $('estado').className = ''; $('estado').textContent = '';
+    ['sec1','sec2','sec3','sec4'].forEach((id, i) => { $(id).open = i === 0; });
+
+    $('exito').style.display = 'none';
+    $('portal').style.display = 'block';
+    window.scrollTo(0, 0);
+    actualizarEstado();
+    cargarEstadoVenta();  // por si la etapa cambió o la venta ya cerró
+  }
+  $('otraCompra').addEventListener('click', reiniciarFormulario);
+
+  cargarEstadoVenta();
+
+  actualizarEstado();
+</script>
+</body>
+</html>
