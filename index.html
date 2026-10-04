@@ -3,197 +3,269 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0E0E10">
+<title>Cheveween 2 · Boletos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --azul:#13294B; --azul-2:#1F3F6E; --oro:#C9A227; --papel:#F3F5F9;
-    --tinta:#1A2230; --suave:#5C6679; --linea:#D5DBE5; --error:#B3261E; --ok:#1E7A46;
+    color-scheme: dark;
+    --negro:#0E0E10;            /* encabezado: negro mate sólido */
+    --panel:rgba(8,8,10,.80);   /* formulario: negro con transparencia */
+    --marino:#0F1E3D;           /* globo de la etapa */
+    --oro:#C9A227;
+    --texto:#F4F5F7; --suave:#C3C8D2; --tenue:#8E96A5;
+    --linea:rgba(255,255,255,.16); --campo:rgba(255,255,255,.07); --borde-campo:rgba(255,255,255,.24);
+    --error:#FF8A80; --ok:#3DBB7A;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:Archivo,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--papel);color:var(--tinta);line-height:1.5}
-  .wrap{max-width:640px;margin:0 auto;padding:28px 16px 48px}
+  [hidden]{display:none!important}
+  html{min-height:100%}
+  body{margin:0;min-height:100vh;font-family:Archivo,system-ui,-apple-system,"Segoe UI",sans-serif;background:#0b0b0f;color:var(--texto);line-height:1.5}
 
-  header{background:var(--azul);color:#fff;border-radius:14px 14px 0 0;padding:26px 24px 22px;position:relative}
-  header h1{margin:0;font-size:1.75rem;font-weight:800;letter-spacing:-.01em}
-  header p{margin:4px 0 0;color:#C8D3E6}
-  .etapa{display:inline-block;margin-top:12px;background:var(--oro);color:var(--azul);font-weight:700;font-size:.85rem;padding:4px 12px;border-radius:999px}
+  /* Fondo temático: horizontal en pantallas anchas, vertical en celulares y tablets en vertical.
+     Si falta la versión .webp se usa la .jpg; si no hay ninguna, queda el fondo oscuro. */
+  body::before{content:"";position:fixed;inset:0;z-index:-1;
+    background:url("fondo-horizontal.webp") center/cover no-repeat, url("fondo-horizontal.jpg") center/cover no-repeat, #0b0b0f}
+  @media (orientation:portrait){
+    body::before{background:url("fondo-vertical.webp") center/cover no-repeat, url("fondo-vertical.jpg") center/cover no-repeat, #0b0b0f}
+  }
+
+  .wrap{max-width:640px;margin:0 auto;padding:28px 16px 40px}
+  a{color:#fff}
+  :focus-visible{outline:3px solid var(--oro);outline-offset:2px}
+
+  /* ── Encabezado ── */
+  .encabezado{background:var(--negro);border-radius:14px 14px 0 0;padding:28px 24px 24px;text-align:center}
+  .logo{display:block;margin:0 auto;max-width:min(440px,88%);max-height:150px;width:auto;height:auto}
+  .logo-texto{display:block;font-size:2rem;font-weight:800;letter-spacing:-.01em}
+  .etapa{display:inline-block;margin-top:16px;background:var(--marino);color:#fff;font-weight:700;font-size:.95rem;letter-spacing:.03em;padding:6px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.14)}
   .etapa:empty{display:none}
-  #cerrado{display:none;background:#fff;border-radius:14px;padding:32px 24px;text-align:center;border:1px solid var(--linea)}
-  #cerrado h2{color:var(--azul);margin:0 0 8px}
-  /* borde perforado tipo talón de boleto */
-  .perforado{height:14px;background:
-    radial-gradient(circle at 7px 0,var(--papel) 6px,transparent 6.5px) 0 0/14px 14px repeat-x,var(--azul);}
+  .instrucciones{margin:12px 0 0;color:#fff}
 
-  details{background:#fff;border:1px solid var(--linea);border-top:none}
-  details:last-of-type{border-radius:0 0 14px 14px}
+  /* ── Paneles con transparencia ── */
+  .panel, details{background:var(--panel);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .vista{border-radius:0 0 14px 14px;padding:28px 24px;text-align:center;border:1px solid var(--linea);border-top:none}
+  .vista h2{margin:0 0 8px;font-size:1.35rem}
+  .vista p{color:var(--suave);margin:0 0 12px}
+
+  details{border:1px solid var(--linea);border-top:none}
+  #secciones details:last-of-type{border-radius:0 0 14px 14px}
   summary{list-style:none;cursor:pointer;padding:18px 22px;display:flex;align-items:center;gap:14px;font-weight:600;font-size:1.05rem}
   summary::-webkit-details-marker{display:none}
-  summary:focus-visible{outline:3px solid var(--oro);outline-offset:-3px}
-  .paso{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--azul);color:var(--azul);font-size:.9rem}
-  .hecho .paso{background:var(--ok);border-color:var(--ok);color:#fff}
-  .flecha{margin-left:auto;transition:transform .2s;color:var(--suave)}
+  .paso{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:2px solid #fff;color:#fff;font-size:.9rem}
+  .hecho .paso{background:var(--ok);border-color:var(--ok)}
+  .flecha{margin-left:auto;transition:transform .2s;color:var(--tenue)}
   details[open] .flecha{transform:rotate(180deg)}
   .cuerpo{padding:0 22px 22px}
 
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media (max-width:480px){.grid{grid-template-columns:1fr}}
   label{display:block;font-size:.88rem;font-weight:500;color:var(--suave);margin-bottom:5px}
-  input,select{width:100%;font:inherit;padding:11px 12px;border:1.5px solid var(--linea);border-radius:8px;background:#fff;color:var(--tinta)}
-  input:focus,select:focus{outline:none;border-color:var(--azul-2);box-shadow:0 0 0 3px rgba(31,63,110,.15)}
+  input,select{width:100%;font:inherit;padding:11px 12px;border:1.5px solid var(--borde-campo);border-radius:8px;background:var(--campo);color:#fff}
+  input::placeholder{color:var(--tenue)}
+  option{background:#16161a;color:#fff}
+  input:focus,select:focus{outline:none;border-color:var(--oro);box-shadow:0 0 0 3px rgba(201,162,39,.25)}
   input.invalido,select.invalido{border-color:var(--error)}
-  select:disabled{background:var(--papel);color:var(--suave)}
+  select:disabled{background:rgba(255,255,255,.03);color:var(--tenue)}
   .msg{font-size:.82rem;color:var(--error);min-height:1.1em;margin-top:3px}
 
-  .talon{margin-top:18px;border:2px dashed var(--linea);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;row-gap:4px}
+  .talon{margin-top:18px;border:2px dashed rgba(255,255,255,.25);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;row-gap:4px}
   .talon span{color:var(--suave)}
   .talon strong{text-align:right}
-  .talon .total{font-size:1.5rem;font-weight:800;color:var(--azul)}
+  .talon .total{font-size:1.5rem;font-weight:800;color:var(--oro)}
 
-  .aviso{color:var(--suave);background:var(--papel);border-radius:8px;padding:14px 16px;margin:0}
-  .pago-img{display:block;max-width:280px;width:100%;margin:0 auto 16px;border-radius:8px;border:1px solid var(--linea)}
-  .pago-nota{margin:0 0 10px;font-size:.92rem;color:var(--tinta);background:#FBF6E6;border:1px solid #EADBA8;border-radius:8px;padding:12px 14px}
-  .pago-link{display:block;text-align:center;background:var(--oro);color:var(--azul);font-weight:700;text-decoration:none;padding:13px;border-radius:8px;margin-bottom:16px}
-  .pago-link:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
-  .resumen{white-space:pre-line;background:var(--papel);border-left:4px solid var(--oro);padding:14px 16px;border-radius:0 8px 8px 0;margin:0}
+  .aviso{color:var(--suave);background:rgba(255,255,255,.06);border-radius:8px;padding:14px 16px;margin:0}
+  .pago-img{display:block;max-width:280px;width:100%;margin:0 auto 16px;border-radius:8px;background:#fff;padding:8px}
+  .pago-nota{margin:0 0 10px;font-size:.92rem;color:#fff;background:rgba(201,162,39,.14);border:1px solid rgba(201,162,39,.45);border-radius:8px;padding:12px 14px}
+  .pago-link{display:block;text-align:center;background:var(--oro);color:#111;font-weight:700;text-decoration:none;padding:13px;border-radius:8px;margin-bottom:16px}
+  .resumen{white-space:pre-line;background:rgba(255,255,255,.06);border-left:4px solid var(--oro);padding:14px 16px;border-radius:0 8px 8px 0;margin:0}
   .datos{white-space:pre-line;font-weight:500;margin:0 0 16px}
+  .contacto-box{margin-top:12px;text-align:center}
+  .contacto{font-weight:700;font-size:1.1rem;color:#fff}
+  .btn-wa{display:inline-block;background:#25D366;color:#0b0b0f;font-weight:700;text-decoration:none;padding:11px 18px;border-radius:999px}
 
-  .contador{font-size:.8rem;color:var(--suave);text-align:right;margin-top:3px}
-
-  /* Comprobante: clave o foto */
+  .contador{font-size:.8rem;color:var(--tenue);text-align:right;margin-top:3px}
   .ayuda{font-size:.88rem;color:var(--suave);margin:0 0 14px}
-  .separador{display:flex;align-items:center;gap:12px;color:var(--suave);font-size:.88rem;margin:8px 0 14px}
+  .separador{display:flex;align-items:center;gap:12px;color:var(--tenue);font-size:.88rem;margin:8px 0 14px}
   .separador::before,.separador::after{content:"";flex:1;border-top:1px solid var(--linea)}
-  .subir{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border:1.5px dashed var(--azul-2);border-radius:8px;color:var(--azul);font-weight:600;cursor:pointer;background:#fff;margin:0}
+  .subir{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border:1.5px dashed rgba(201,162,39,.7);border-radius:8px;color:#fff;font-weight:600;cursor:pointer;background:transparent;margin:0}
   .subir:focus-within{outline:3px solid var(--oro);outline-offset:2px}
   .subir input{position:absolute;width:1px;height:1px;opacity:0}
-  .vista{display:none;align-items:center;gap:12px;border:1.5px solid var(--ok);border-radius:8px;padding:10px}
-  .vista img{width:64px;height:64px;object-fit:cover;border-radius:6px;flex:none}
-  .vista span{flex:1;font-size:.9rem;word-break:break-all}
-  .vista button{font:inherit;font-size:.88rem;border:none;background:none;color:var(--error);cursor:pointer;padding:6px;text-decoration:underline}
+  .previa{display:none;align-items:center;gap:12px;border:1.5px solid var(--ok);border-radius:8px;padding:10px}
+  .previa img{width:64px;height:64px;object-fit:cover;border-radius:6px;flex:none}
+  .previa span{flex:1;font-size:.9rem;word-break:break-all}
+  .previa button{font:inherit;font-size:.88rem;border:none;background:none;color:var(--error);cursor:pointer;padding:6px;text-decoration:underline}
 
-  #terminar{margin-top:22px;width:100%;font:inherit;font-weight:700;font-size:1.05rem;padding:15px;border:none;border-radius:10px;background:var(--azul);color:#fff;cursor:pointer}
-  #terminar:disabled{background:#9AA6BA;cursor:not-allowed}
-  #terminar:focus-visible{outline:3px solid var(--oro);outline-offset:2px}
+  /* ── Aceptación y botón ── */
+  .acciones{margin-top:16px;border-radius:14px;padding:18px 22px;border:1px solid var(--linea)}
+  .acepto{display:flex;gap:12px;align-items:flex-start;color:var(--texto);font-size:.92rem;margin:0;cursor:pointer}
+  .acepto input{width:20px;height:20px;flex:none;margin:2px 0 0;accent-color:var(--oro);padding:0}
+  .sin-link{text-decoration:none;color:inherit;cursor:default}
+  #terminar{margin-top:16px;width:100%;font:inherit;font-weight:800;font-size:1.05rem;padding:15px;border:none;border-radius:10px;background:var(--oro);color:#111;cursor:pointer}
+  #terminar:disabled{background:rgba(255,255,255,.16);color:rgba(255,255,255,.5);cursor:not-allowed}
   #estado{text-align:center;margin-top:12px;min-height:1.4em}
   #estado.error{color:var(--error)}
+  .vista button{margin-top:14px;font:inherit;font-weight:700;padding:11px 20px;border-radius:8px;border:1.5px solid var(--oro);background:transparent;color:#fff;cursor:pointer}
 
-  #exito{display:none;background:#fff;border-radius:14px;padding:32px 24px;text-align:center;border:1px solid var(--linea)}
-  #exito h2{color:var(--ok);margin:0 0 8px}
-  #exito button{margin-top:18px;font:inherit;font-weight:600;padding:11px 20px;border-radius:8px;border:1.5px solid var(--azul);background:#fff;color:var(--azul);cursor:pointer}
+  /* ── Cuenta regresiva ── */
+  .cuenta-regresiva{margin-top:18px}
+  .cuenta-regresiva h3{margin:0 0 12px;font-size:1rem;color:#fff;font-weight:600}
+  .reloj{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:360px;margin:0 auto}
+  .reloj div{background:rgba(255,255,255,.06);border:1px solid var(--linea);border-radius:10px;padding:12px 6px}
+  .reloj span{display:block;font-size:2.2rem;font-weight:800;color:var(--oro);font-variant-numeric:tabular-nums;line-height:1.1}
+  .reloj small{color:var(--suave);font-size:.8rem}
+
+  /* ── Pie con documentos legales ── */
+  .pie{margin-top:18px;text-align:center;font-size:.85rem;background:rgba(0,0,0,.65);border-radius:10px;padding:10px 14px;color:var(--suave)}
+  .pie a{margin:0 6px}
 
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div id="portal">
-    <header>
-      <h1>Compra de boletos</h1>
-      <p>Llena las cuatro secciones y presiona Terminar.</p>
-      <span class="etapa" id="etapaTxt"></span>
-    </header>
-    <div class="perforado" aria-hidden="true"></div>
+  <header class="encabezado">
+    <img class="logo" id="logo" src="logo.svg" alt="Cheveween 2"
+         onerror="if(!this.dataset.png){this.dataset.png=1;this.src='logo.png'}else{this.hidden=true;document.getElementById('logoTexto').hidden=false}">
+    <span class="logo-texto" id="logoTexto" hidden>Cheveween 2</span>
+    <div><span class="etapa" id="etapaTxt"></span></div>
+    <p class="instrucciones" id="instrucciones" hidden>Llena las cuatro secciones y presiona Terminar.</p>
+  </header>
 
-    <!-- SECCIÓN 1 -->
-    <details id="sec1" open>
-      <summary><span class="paso">1</span>Datos del comprador<span class="flecha">▾</span></summary>
-      <div class="cuerpo">
-        <div class="grid">
-          <div><label for="nombres">Nombres</label><input id="nombres" autocomplete="given-name"><div class="msg"></div></div>
-          <div><label for="apellidos">Apellidos</label><input id="apellidos" autocomplete="family-name"><div class="msg"></div></div>
-          <div><label for="telefono">Número telefónico</label><input id="telefono" inputmode="numeric" maxlength="10" autocomplete="tel-national" placeholder="10 dígitos"><div class="msg"></div></div>
-          <div><label for="telefono2">Confirma tu número</label><input id="telefono2" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="10 dígitos"><div class="msg"></div></div>
-        </div>
-      </div>
-    </details>
-
-    <!-- SECCIÓN 2 -->
-    <details id="sec2">
-      <summary><span class="paso">2</span>Orden de compra<span class="flecha">▾</span></summary>
-      <div class="cuerpo">
-        <div class="grid">
-          <div>
-            <label for="tipoBoleto">Tipo de boleto</label>
-            <select id="tipoBoleto">
-              <option value="">Selecciona…</option>
-              <option value="UADY">FCA - UADY</option>
-              <option value="EXTERNO">Externo</option>
-            </select>
-          </div>
-          <div>
-            <label for="tipoPago">Tipo de pago</label>
-            <select id="tipoPago">
-              <option value="">Selecciona…</option>
-              <option value="CODI">CODI</option>
-              <option value="TRANSFERENCIA">Transferencia</option>
-              <option value="TARJETA">Tarjeta débito/crédito</option>
-              <option value="EFECTIVO">Efectivo</option>
-            </select>
-          </div>
-          <div>
-            <label for="cantidad">Cantidad de boletos</label>
-            <select id="cantidad" disabled><option value="">Elige el tipo de boleto</option></select>
-          </div>
-        </div>
-        <div class="talon" aria-live="polite">
-          <span>Costo por boleto</span><strong id="costo">—</strong>
-          <span>Total a pagar</span><strong id="total" class="total">—</strong>
-        </div>
-      </div>
-    </details>
-
-    <!-- SECCIÓN 3 -->
-    <details id="sec3">
-      <summary><span class="paso">3</span>Pago<span class="flecha">▾</span></summary>
-      <div class="cuerpo" id="infoPago" aria-live="polite">
-        <p class="aviso">Por favor completa las secciones anteriores.</p>
-      </div>
-    </details>
-
-    <!-- SECCIÓN 4 -->
-    <details id="sec4">
-      <summary><span class="paso">4</span>Comprobante<span class="flecha">▾</span></summary>
-      <div class="cuerpo">
-        <p class="ayuda">Solo necesitas uno de los dos: la clave o la foto de tu comprobante.</p>
-
-        <label for="clave" id="claveLabel">Por favor ingresa la clave de rastreo de tu pago</label>
-        <input id="clave" maxlength="18" autocomplete="off" spellcheck="false" style="text-transform:uppercase">
-        <div class="contador"><span id="cuenta">0</span> / <span id="limite">18</span></div>
-        <div class="msg"></div>
-
-        <div class="separador">o bien</div>
-
-        <label class="subir" id="subirBox">
-          <input type="file" id="foto" accept="image/*">
-          Subir foto del comprobante
-        </label>
-        <div class="vista" id="vista">
-          <img id="vistaImg" alt="Vista previa del comprobante">
-          <span id="vistaNombre"></span>
-          <button type="button" id="quitarFoto">Quitar</button>
-        </div>
-        <div class="msg" id="fotoMsg"></div>
-      </div>
-    </details>
-
-    <button id="terminar" disabled>Terminar</button>
-    <div id="estado" role="status"></div>
+  <!-- Cargando -->
+  <div class="panel vista" id="cargando" role="status">
+    <p id="cargandoTxt">Cargando…</p>
+    <button type="button" id="reintentar" hidden>Reintentar</button>
   </div>
 
-  <div id="cerrado" role="status">
-    <h2>La venta en línea ha cerrado</h2>
-    <p>Gracias por tu interés. Para más información comunícate con los organizadores del evento.</p>
+  <!-- Venta cerrada / entre etapas / antes de iniciar -->
+  <div class="panel vista" id="avisoVenta" role="status" hidden>
+    <h2 id="avisoTitulo"></h2>
+    <p id="avisoTexto"></p>
+    <div class="contacto-box" id="avisoContacto"></div>
+    <div class="cuenta-regresiva" id="cuentaRegresiva" hidden aria-live="off">
+      <h3 id="crTitulo"></h3>
+      <div class="reloj">
+        <div><span id="crH">00</span><small>horas</small></div>
+        <div><span id="crM">00</span><small>minutos</small></div>
+        <div><span id="crS">00</span><small>segundos</small></div>
+      </div>
+    </div>
   </div>
 
-  <div id="exito" role="status">
-    <h2>Compra registrada</h2>
+  <div id="portal" hidden>
+    <div id="secciones">
+      <!-- SECCIÓN 1 -->
+      <details id="sec1" open>
+        <summary><span class="paso">1</span>Datos del comprador<span class="flecha">▾</span></summary>
+        <div class="cuerpo">
+          <div class="grid">
+            <div><label for="nombres">Nombres</label><input id="nombres" autocomplete="given-name"><div class="msg"></div></div>
+            <div><label for="apellidos">Apellidos</label><input id="apellidos" autocomplete="family-name"><div class="msg"></div></div>
+            <div><label for="telefono">Número de WhatsApp</label><input id="telefono" inputmode="numeric" maxlength="10" autocomplete="tel-national" placeholder="10 dígitos"><div class="msg"></div></div>
+            <div><label for="telefono2">Confirma tu WhatsApp</label><input id="telefono2" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="10 dígitos"><div class="msg"></div></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- SECCIÓN 2 -->
+      <details id="sec2">
+        <summary><span class="paso">2</span>Orden de compra<span class="flecha">▾</span></summary>
+        <div class="cuerpo">
+          <div class="grid">
+            <div>
+              <label for="tipoBoleto">Tipo de boleto</label>
+              <select id="tipoBoleto">
+                <option value="">Selecciona…</option>
+                <option value="UADY">FCA - UADY</option>
+                <option value="EXTERNO">Externo</option>
+              </select>
+            </div>
+            <div>
+              <label for="tipoPago">Tipo de pago</label>
+              <select id="tipoPago">
+                <option value="">Selecciona…</option>
+                <option value="CODI">CODI</option>
+                <option value="TRANSFERENCIA">Transferencia</option>
+                <option value="TARJETA">Tarjeta débito/crédito</option>
+                <option value="EFECTIVO">Efectivo</option>
+              </select>
+            </div>
+            <div>
+              <label for="cantidad">Cantidad de boletos</label>
+              <select id="cantidad" disabled><option value="">Elige el tipo de boleto</option></select>
+            </div>
+          </div>
+          <div class="talon" aria-live="polite">
+            <span>Costo por boleto</span><strong id="costo">—</strong>
+            <span>Total a pagar</span><strong id="total" class="total">—</strong>
+          </div>
+        </div>
+      </details>
+
+      <!-- SECCIÓN 3 -->
+      <details id="sec3">
+        <summary><span class="paso">3</span>Pago<span class="flecha">▾</span></summary>
+        <div class="cuerpo" id="infoPago" aria-live="polite">
+          <p class="aviso">Por favor completa las secciones anteriores.</p>
+        </div>
+      </details>
+
+      <!-- SECCIÓN 4 -->
+      <details id="sec4">
+        <summary><span class="paso">4</span>Comprobante<span class="flecha">▾</span></summary>
+        <div class="cuerpo">
+          <p class="ayuda">Solo necesitas uno de los dos: la clave o la foto de tu comprobante.</p>
+
+          <label for="clave" id="claveLabel">Por favor ingresa la clave de rastreo de tu pago</label>
+          <input id="clave" maxlength="18" autocomplete="off" spellcheck="false" style="text-transform:uppercase">
+          <div class="contador"><span id="cuenta">0</span> / <span id="limite">18</span></div>
+          <div class="msg"></div>
+
+          <div class="separador">o bien</div>
+
+          <label class="subir" id="subirBox">
+            <input type="file" id="foto" accept="image/*">
+            Subir foto del comprobante
+          </label>
+          <div class="previa" id="vista">
+            <img id="vistaImg" alt="Vista previa del comprobante">
+            <span id="vistaNombre"></span>
+            <button type="button" id="quitarFoto">Quitar</button>
+          </div>
+          <div class="msg" id="fotoMsg"></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="panel acciones">
+      <label class="acepto">
+        <input type="checkbox" id="acepta">
+        <span>He leído y acepto el <a data-legal="aviso" target="_blank" rel="noopener">aviso de privacidad</a>,
+        los <a data-legal="tyc" target="_blank" rel="noopener">términos y condiciones</a> y el
+        <a data-legal="deslinde" target="_blank" rel="noopener">deslinde de responsabilidad</a>.</span>
+      </label>
+      <button id="terminar" disabled>Terminar</button>
+      <div id="estado" role="status"></div>
+    </div>
+  </div>
+
+  <div class="panel vista" id="exito" role="status" hidden>
+    <h2 style="color:var(--ok)">Compra registrada</h2>
     <p id="exitoTexto"></p>
     <button type="button" id="otraCompra">Comprar otro boleto</button>
   </div>
+
+  <footer class="pie">
+    <a data-legal="aviso" target="_blank" rel="noopener">Aviso de privacidad</a> ·
+    <a data-legal="tyc" target="_blank" rel="noopener">Términos y condiciones</a> ·
+    <a data-legal="deslinde" target="_blank" rel="noopener">Deslinde de responsabilidad</a>
+  </footer>
 </div>
 
 <script>
+
   // ───── Conexión con Apps Script ─────
   // Pega aquí el link /exec de tu implementación de Apps Script (App web).
   const API_URL = 'https://script.google.com/macros/s/AKfycbx0bs0NYUV_hjEJcw-O3QvjUMWO0ejDAKFIm6jij3BUG_WUjEM8Dux5WPzPwjghjrfXqg/exec';
@@ -282,7 +354,7 @@
     $('sec2').classList.toggle('hecho', s2);
     $('sec3').classList.toggle('hecho', s3);
     $('sec4').classList.toggle('hecho', s4);
-    $('terminar').disabled = !(s1 && s2 && s3 && s4);
+    $('terminar').disabled = !(s1 && s2 && s3 && s4 && $('acepta').checked);
   }
 
   // ───── Sección 1 ─────
@@ -338,13 +410,18 @@
       cont.innerHTML = '<p class="aviso">Por favor completa las secciones anteriores.</p>';
       return;
     }
+    if ($('tipoPago').value === 'EFECTIVO'){
+      cont.innerHTML = htmlEfectivo();
+      $('sec3').open = true;
+      return;
+    }
     const id = ++consultaActual;
     cont.innerHTML = '<p class="aviso">Cargando datos de pago…</p>';
     api('infoPago', { tipoBoleto: $('tipoBoleto').value, tipoPago: $('tipoPago').value, cantidad: Number($('cantidad').value) })
       .then(r => { if (id === consultaActual) pintarInfoPago(r); })
       .catch(e => {
         if (id !== consultaActual) return;
-        if (e.message.indexOf('VENTA_CERRADA') !== -1) return mostrarCerrado();
+        if (e.message.indexOf('VENTA_CERRADA') !== -1) return cargarEstadoVenta();
         cont.innerHTML = '<p class="aviso" style="color:var(--error)">No se pudieron cargar los datos de pago: ' + escapar(e.message) + '</p>';
       });
   }
@@ -464,13 +541,14 @@
       cantidad: Number($('cantidad').value),
       claveRastreo: $('clave').value.trim().toUpperCase(),
       foto: foto,
-      cotizacion: cotizacion
+      cotizacion: cotizacion,
+      acepta: $('acepta').checked
     };
 
     api('registrar', { datos: datos })
       .then(r => {
-        $('portal').style.display = 'none';
-        $('exito').style.display = 'block';
+        mostrarVista('exito');
+        window.scrollTo(0, 0);
         $('exitoTexto').textContent = 'Registramos ' + r.cantidad + (r.cantidad === 1 ? ' boleto' : ' boletos') +
           ' a nombre de ' + datos.nombres + ' ' + datos.apellidos + ' por un total de ' + dinero(r.total) + '.';
       })
@@ -485,24 +563,131 @@
   }
 
   // ───── Etapa de venta ─────
+  const NOMBRES_ETAPA = { 1: 'Preventa', 2: 'Preferente', 3: 'Regular' };
+  const DOCE_HORAS = 12 * 60 * 60 * 1000;
+  let desfaseReloj = 0;   // diferencia entre la hora del servidor y la del dispositivo
+  let contacto = '';
+  let proximoInicio = null;
+  let ticker = null;
+  let reintentos = 0;
+
   function aplicarEtapa(etapa, precios){
     PRECIOS = precios;
-    const NOMBRES_ETAPA = { 1: 'Preventa', 2: 'Preferente', 3: 'Regular' };
     $('etapaTxt').textContent = NOMBRES_ETAPA[etapa] || '';
     calcularTotales();
   }
 
-  function mostrarCerrado(){
-    $('portal').style.display = 'none';
-    $('exito').style.display = 'none';
-    $('cerrado').style.display = 'block';
+  function mostrarVista(v){
+    ['cargando','portal','avisoVenta','exito'].forEach(id => { $(id).hidden = id !== v; });
+    $('instrucciones').hidden = v !== 'portal';
+    if (v === 'avisoVenta' || v === 'cargando') $('etapaTxt').textContent = '';
+  }
+
+  // Número de INFO!B1 como botón de WhatsApp (si tiene 10 dígitos se agrega la lada de México)
+  function linkWhatsApp(t){
+    let d = String(t || '').replace(/\D/g, '');
+    if (d.length === 10) d = '52' + d;
+    return d.length >= 11 ? 'https://wa.me/' + d : '';
+  }
+  function htmlContacto(){
+    if (!contacto) return '';
+    const wa = linkWhatsApp(contacto);
+    return wa ? '<a class="btn-wa" target="_blank" rel="noopener" href="' + wa + '">' + escapar(contacto) + ' · Escríbenos por WhatsApp</a>'
+              : '<p class="contacto">' + escapar(contacto) + '</p>';
+  }
+  function htmlEfectivo(){
+    return '<p class="aviso">El pago en efectivo no está disponible en este portal de autoservicio. ' +
+      'Para completar tu compra en línea elige CODI, transferencia o tarjeta.' +
+      (contacto ? ' Si necesitas pagar en efectivo, comunícate al:' : '') + '</p>' +
+      (contacto ? '<div class="contacto-box">' + htmlContacto() + '</div>' : '');
+  }
+
+  // Links de PROYECCION J11:J13
+  function aplicarLegales(l){
+    l = l || {};
+    document.querySelectorAll('[data-legal]').forEach(a => {
+      const url = l[a.dataset.legal];
+      if (url){ a.href = url; a.classList.remove('sin-link'); }
+      else { a.removeAttribute('href'); a.classList.add('sin-link'); }
+    });
+  }
+
+  function mostrarAviso(r){
+    const textos = {
+      antes:   { t: 'La venta de boletos aún no comienza', p: 'Muy pronto podrás comprar tus boletos aquí.', c: false },
+      entre:   { t: 'La etapa de venta ha terminado',
+                 p: contacto ? 'Si quieres adquirir boletos, por favor espera más información o contacta al número:'
+                             : 'Si quieres adquirir boletos, por favor espera más información.', c: true },
+      cerrada: { t: 'La venta en línea ha cerrado',
+                 p: contacto ? 'Gracias por tu interés. Para más información contacta al número:'
+                             : 'Gracias por tu interés.', c: true }
+    }[r.estado];
+    $('avisoTitulo').textContent = textos.t;
+    $('avisoTexto').textContent = textos.p;
+    $('avisoContacto').innerHTML = textos.c ? htmlContacto() : '';
+    proximoInicio = r.proximoInicio || null;
+    $('crTitulo').textContent = r.proximaEtapa ? 'La etapa ' + NOMBRES_ETAPA[r.proximaEtapa] + ' inicia en' : '';
+    mostrarVista('avisoVenta');
+    iniciarReloj();
+  }
+
+  // Cuenta regresiva: visible solo en las 12 horas previas al inicio de la etapa
+  function iniciarReloj(){
+    clearInterval(ticker); ticker = null;
+    if (!proximoInicio){ $('cuentaRegresiva').hidden = true; return; }
+    actualizarReloj();
+    ticker = setInterval(actualizarReloj, 1000);
+  }
+  function actualizarReloj(){
+    const restante = proximoInicio - (Date.now() + desfaseReloj);
+    if (restante <= 0){
+      clearInterval(ticker); ticker = null;
+      pintarReloj(0);
+      $('crTitulo').textContent = 'Abriendo la venta…';
+      setTimeout(cargarEstadoVenta, 1500);
+      return;
+    }
+    $('cuentaRegresiva').hidden = restante > DOCE_HORAS;
+    if (restante <= DOCE_HORAS) pintarReloj(restante);
+  }
+  function pintarReloj(ms){
+    const s = Math.ceil(ms / 1000), dos = n => String(n).padStart(2, '0');
+    $('crH').textContent = dos(Math.floor(s / 3600));
+    $('crM').textContent = dos(Math.floor(s % 3600 / 60));
+    $('crS').textContent = dos(s % 60);
   }
 
   function cargarEstadoVenta(){
     api('estado')
-      .then(r => { if (!r.abierta) return mostrarCerrado(); aplicarEtapa(r.etapa, r.precios); })
-      .catch(() => {});  // si falla, los precios llegan igual al cargar la sección 3
+      .then(r => {
+        desfaseReloj = r.ahora - Date.now();
+        contacto = r.contacto || '';
+        aplicarLegales(r.legales);
+        if (!$('exito').hidden) return; // no interrumpir la pantalla de compra registrada
+        if (r.abierta){
+          clearInterval(ticker); ticker = null; reintentos = 0;
+          aplicarEtapa(r.etapa, r.precios);
+          mostrarVista('portal');
+          if ($('tipoPago').value === 'EFECTIVO') $('infoPago').innerHTML = htmlEfectivo();
+          return;
+        }
+        mostrarAviso(r);
+        // Si la cuenta llegó a cero pero el servidor aún no abre, se reintenta unos segundos después
+        if (r.proximoInicio && r.proximoInicio - r.ahora < 5000 && reintentos++ < 20) setTimeout(cargarEstadoVenta, 3000);
+      })
+      .catch(e => {
+        if (!$('cargando').hidden){
+          $('cargandoTxt').textContent = 'No se pudo cargar el portal. ' + e.message;
+          $('reintentar').hidden = false;
+        }
+      });
   }
+  $('reintentar').addEventListener('click', () => {
+    $('reintentar').hidden = true;
+    $('cargandoTxt').textContent = 'Cargando…';
+    cargarEstadoVenta();
+  });
+  $('acepta').addEventListener('change', actualizarEstado);
 
   // ───── Comprar otro boleto ─────
   // Limpia el formulario sin recargar la página
@@ -529,8 +714,8 @@
     $('estado').className = ''; $('estado').textContent = '';
     ['sec1','sec2','sec3','sec4'].forEach((id, i) => { $(id).open = i === 0; });
 
-    $('exito').style.display = 'none';
-    $('portal').style.display = 'block';
+    $('acepta').checked = false;
+    mostrarVista('portal');
     window.scrollTo(0, 0);
     actualizarEstado();
     cargarEstadoVenta();  // por si la etapa cambió o la venta ya cerró
