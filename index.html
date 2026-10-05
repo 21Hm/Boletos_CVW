@@ -296,6 +296,7 @@
   const LONGITUD_ORDEN_CLIP = 12;  // tarjeta (CLIP)
   const LEYENDA_CLIP = 'Serás redireccionado a la página de CLIP. Al realizar tu pago, da clic en VER RECIBO, copia el número de ORDEN y regresa aquí para terminar tu orden de compra.';
   const $ = id => document.getElementById(id);
+  const NOMBRE_VALIDO = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ' .\-]{0,59}$/;
   const dinero = n => '$' + n.toLocaleString('es-MX');
 
   let infoPagoCargada = false;
@@ -312,8 +313,8 @@
   function validarSec1(mostrar){
     const n = $('nombres'), a = $('apellidos'), t = $('telefono'), t2 = $('telefono2');
     const errs = {
-      n: n.value.trim() ? '' : 'Escribe tu(s) nombre(s).',
-      a: a.value.trim() ? '' : 'Escribe tus apellidos.',
+      n: !n.value.trim() ? 'Escribe tu(s) nombre(s).' : (NOMBRE_VALIDO.test(n.value.trim()) ? '' : 'Usa solo letras.'),
+      a: !a.value.trim() ? 'Escribe tus apellidos.' : (NOMBRE_VALIDO.test(a.value.trim()) ? '' : 'Usa solo letras.'),
       t: /^\d{10}$/.test(t.value) ? '' : 'Debe tener 10 dígitos.',
       t2: !/^\d{10}$/.test(t2.value) ? 'Debe tener 10 dígitos.' : (t2.value !== t.value ? 'Los números no coinciden.' : '')
     };
