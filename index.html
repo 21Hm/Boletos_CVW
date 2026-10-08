@@ -101,6 +101,7 @@
   .acciones{margin-top:16px;border-radius:14px;padding:18px 22px;border:1px solid var(--linea)}
   .acepto{display:flex;gap:12px;align-items:flex-start;color:var(--texto);font-size:.92rem;margin:0;cursor:pointer}
   .acepto input{width:20px;height:20px;flex:none;margin:2px 0 0;accent-color:var(--oro);padding:0}
+  .acepto-wa{margin-top:16px}
   .sin-link{text-decoration:none;color:inherit;cursor:default}
   #terminar{margin-top:16px;width:100%;font:inherit;font-weight:800;font-size:1.05rem;padding:15px;border:none;border-radius:10px;background:var(--oro);color:#111;cursor:pointer}
   #terminar:disabled{background:rgba(255,255,255,.16);color:rgba(255,255,255,.5);cursor:not-allowed}
@@ -166,6 +167,10 @@
             <div><label for="telefono">Número de WhatsApp</label><input id="telefono" inputmode="numeric" maxlength="10" autocomplete="tel-national" placeholder="10 dígitos"><div class="msg"></div></div>
             <div><label for="telefono2">Confirma tu WhatsApp</label><input id="telefono2" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="10 dígitos"><div class="msg"></div></div>
           </div>
+          <label class="acepto acepto-wa">
+            <input type="checkbox" id="aceptaWa">
+            <span>Acepto ser contactado por WhatsApp a este número para completar mi compra y recibir mis boletos.</span>
+          </label>
         </div>
       </details>
 
@@ -324,7 +329,7 @@
       if (mostrar === true || mostrar === t) marcar(t, errs.t);
       if (mostrar === true || mostrar === t2 || (mostrar === t && t2.value)) marcar(t2, errs.t2);
     }
-    return !errs.n && !errs.a && !errs.t && !errs.t2;
+    return !errs.n && !errs.a && !errs.t && !errs.t2 && $('aceptaWa').checked;
   }
 
   const validarSec2 = () => $('tipoBoleto').value && $('tipoPago').value && $('cantidad').value;
@@ -543,7 +548,8 @@
       claveRastreo: $('clave').value.trim().toUpperCase(),
       foto: foto,
       cotizacion: cotizacion,
-      acepta: $('acepta').checked
+      acepta: $('acepta').checked,
+      aceptaWhatsApp: $('aceptaWa').checked
     };
 
     api('registrar', { datos: datos })
@@ -689,6 +695,7 @@
     cargarEstadoVenta();
   });
   $('acepta').addEventListener('change', actualizarEstado);
+  $('aceptaWa').addEventListener('change', actualizarEstado);
 
   // ───── Comprar otro boleto ─────
   // Limpia el formulario sin recargar la página
@@ -716,6 +723,7 @@
     ['sec1','sec2','sec3','sec4'].forEach((id, i) => { $(id).open = i === 0; });
 
     $('acepta').checked = false;
+    $('aceptaWa').checked = false;
     mostrarVista('portal');
     window.scrollTo(0, 0);
     actualizarEstado();
