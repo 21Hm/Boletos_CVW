@@ -102,6 +102,10 @@
   .acepto{display:flex;gap:12px;align-items:flex-start;color:var(--texto);font-size:.92rem;margin:0;cursor:pointer}
   .acepto input{width:20px;height:20px;flex:none;margin:2px 0 0;accent-color:var(--oro);padding:0}
   .acepto-wa{margin-top:16px}
+  .campo-correo{margin-top:14px}
+  .alerta-transf{border:1.5px solid var(--oro);background:rgba(201,162,39,.12);border-radius:10px;padding:16px;text-align:center}
+  .alerta-transf p{margin:0 0 14px;color:#fff;font-weight:700;line-height:1.45}
+  .alerta-transf button{font:inherit;font-weight:800;padding:11px 28px;border:none;border-radius:8px;background:var(--oro);color:#111;cursor:pointer}
   .sin-link{text-decoration:none;color:inherit;cursor:default}
   #terminar{margin-top:16px;width:100%;font:inherit;font-weight:800;font-size:1.05rem;padding:15px;border:none;border-radius:10px;background:var(--oro);color:#111;cursor:pointer}
   #terminar:disabled{background:rgba(255,255,255,.16);color:rgba(255,255,255,.5);cursor:not-allowed}
@@ -167,6 +171,7 @@
             <div><label for="telefono">Número de WhatsApp</label><input id="telefono" inputmode="numeric" maxlength="10" autocomplete="tel-national" placeholder="10 dígitos"><div class="msg"></div></div>
             <div><label for="telefono2">Confirma tu WhatsApp</label><input id="telefono2" inputmode="numeric" maxlength="10" autocomplete="off" placeholder="10 dígitos"><div class="msg"></div></div>
           </div>
+          <div class="campo-correo"><label for="correo">Correo electrónico</label><input id="correo" type="email" inputmode="email" autocomplete="email" maxlength="100" placeholder="tucorreo@ejemplo.com" spellcheck="false" autocapitalize="off"><div class="msg"></div></div>
           <label class="acepto acepto-wa">
             <input type="checkbox" id="aceptaWa">
             <span>Acepto ser contactado por WhatsApp a este número para completar mi compra y recibir mis boletos.</span>
@@ -221,14 +226,14 @@
       <details id="sec4">
         <summary><span class="paso">4</span>Comprobante<span class="flecha">▾</span></summary>
         <div class="cuerpo">
-          <p class="ayuda">Solo necesitas uno de los dos: la clave o la foto de tu comprobante.</p>
+          <p class="ayuda">Necesitas los dos: la clave y la foto de tu comprobante.</p>
 
           <label for="clave" id="claveLabel">Por favor ingresa la clave de rastreo de tu pago</label>
           <input id="clave" maxlength="18" autocomplete="off" spellcheck="false" style="text-transform:uppercase">
           <div class="contador"><span id="cuenta">0</span> / <span id="limite">18</span></div>
           <div class="msg"></div>
 
-          <div class="separador">o bien</div>
+          <div class="separador">y</div>
 
           <label class="subir" id="subirBox">
             <input type="file" id="foto" accept="image/*">
@@ -301,6 +306,7 @@
   const LONGITUD_ORDEN_CLIP = 12;  // tarjeta (CLIP)
   const LEYENDA_CLIP = 'Serás redireccionado a la página de CLIP. Al realizar tu pago, da clic en VER RECIBO, copia el número de ORDEN y regresa aquí para terminar tu orden de compra.';
   const $ = id => document.getElementById(id);
+  const CORREO_VALIDO = /^[a-z0-9][a-z0-9._%+\-]{0,63}@[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?)*\.[a-z]{2,}$/;
   const NOMBRE_VALIDO = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ][A-Za-zÁÉÍÓÚÜÑáéíóúüñ' .\-]{0,59}$/;
   const dinero = n => '$' + n.toLocaleString('es-MX');
 
@@ -316,20 +322,22 @@
   }
 
   function validarSec1(mostrar){
-    const n = $('nombres'), a = $('apellidos'), t = $('telefono'), t2 = $('telefono2');
+    const n = $('nombres'), a = $('apellidos'), t = $('telefono'), t2 = $('telefono2'), c = $('correo');
     const errs = {
       n: !n.value.trim() ? 'Escribe tu(s) nombre(s).' : (NOMBRE_VALIDO.test(n.value.trim()) ? '' : 'Usa solo letras.'),
       a: !a.value.trim() ? 'Escribe tus apellidos.' : (NOMBRE_VALIDO.test(a.value.trim()) ? '' : 'Usa solo letras.'),
       t: /^\d{10}$/.test(t.value) ? '' : 'Debe tener 10 dígitos.',
-      t2: !/^\d{10}$/.test(t2.value) ? 'Debe tener 10 dígitos.' : (t2.value !== t.value ? 'Los números no coinciden.' : '')
+      t2: !/^\d{10}$/.test(t2.value) ? 'Debe tener 10 dígitos.' : (t2.value !== t.value ? 'Los números no coinciden.' : ''),
+      c: CORREO_VALIDO.test(c.value.trim().toLowerCase()) ? '' : 'Escribe un correo válido.'
     };
     if (mostrar){
       if (mostrar === true || mostrar === n) marcar(n, errs.n);
       if (mostrar === true || mostrar === a) marcar(a, errs.a);
       if (mostrar === true || mostrar === t) marcar(t, errs.t);
       if (mostrar === true || mostrar === t2 || (mostrar === t && t2.value)) marcar(t2, errs.t2);
+      if (mostrar === true || mostrar === c) marcar(c, errs.c);
     }
-    return !errs.n && !errs.a && !errs.t && !errs.t2 && $('aceptaWa').checked;
+    return !errs.n && !errs.a && !errs.t && !errs.t2 && !errs.c && $('aceptaWa').checked;
   }
 
   const validarSec2 = () => $('tipoBoleto').value && $('tipoPago').value && $('cantidad').value;
@@ -347,11 +355,9 @@
                        : 'La clave debe tener ' + LONGITUD_CLAVE + ' caracteres.';
   }
 
-  // Sección 4 completa: clave válida O foto. Si hay foto y la clave está a medias, se pide completarla o borrarla.
+  // Sección 4 completa: clave válida Y foto del comprobante.
   function validarSec4(){
-    const hayClave = $('clave').value.trim() !== '';
-    if (hayClave && !claveValida()) return false;
-    return hayClave || !!foto;
+    return claveValida() && !!foto;
   }
 
   function actualizarEstado(){
@@ -364,7 +370,7 @@
   }
 
   // ───── Sección 1 ─────
-  ['nombres','apellidos','telefono','telefono2'].forEach(id => {
+  ['nombres','apellidos','telefono','telefono2','correo'].forEach(id => {
     const el = $(id);
     el.addEventListener('input', () => {
       if (id.startsWith('telefono')) el.value = el.value.replace(/\D/g,'').slice(0,10);
@@ -398,7 +404,7 @@
   }
 
   $('tipoBoleto').addEventListener('change', () => { llenarCantidad(); cambioOrden(); });
-  $('tipoPago').addEventListener('change', () => { ajustarCampoClave(); cambioOrden(); });
+  $('tipoPago').addEventListener('change', () => { avisoTransfAceptado = false; ajustarCampoClave(); cambioOrden(); });
   $('cantidad').addEventListener('change', cambioOrden);
 
   function cambioOrden(){
@@ -432,7 +438,24 @@
       });
   }
 
+  // Aviso obligatorio antes de mostrar los datos de transferencia (solo en el sitio)
+  const AVISO_TRANSFERENCIA = 'ASEGÚRATE DE PONER TU NOMBRE COMPLETO COMO CONCEPTO DE LA TRANSFERENCIA. DE NO HACERLO, SE PODRÍAN PRESENTAR PROBLEMAS AL VALIDAR TU PAGO Y RETRASAR LA ENTREGA DE TUS ACCESOS.';
+  let avisoTransfAceptado = false;
+
   function pintarInfoPago(r){
+    if ($('tipoPago').value === 'TRANSFERENCIA' && !avisoTransfAceptado){
+      aplicarEtapa(r.etapa, r.precios);
+      $('costo').textContent = dinero(r.precio);
+      $('total').textContent = dinero(r.total);
+      cotizacion = r.cotizacion;
+      $('infoPago').innerHTML = '<div class="alerta-transf" role="alertdialog" aria-labelledby="txtAvisoTransf">' +
+        '<p id="txtAvisoTransf">' + escapar(AVISO_TRANSFERENCIA) + '</p>' +
+        '<button type="button" id="aceptarTransf">Aceptar</button></div>';
+      $('sec3').open = true;
+      $('aceptarTransf').addEventListener('click', () => { avisoTransfAceptado = true; pintarInfoPago(r); });
+      $('aceptarTransf').focus();
+      return;
+    }
     const cont = $('infoPago');
     // Si la etapa cambió mientras llenaba el formulario, se actualizan precios y talón
     aplicarEtapa(r.etapa, r.precios);
@@ -475,7 +498,7 @@
     actualizarEstado();
   });
   $('clave').addEventListener('blur', e => {
-    if (e.target.value && !claveValida()) marcar(e.target, mensajeClave() + (foto ? ' Complétala o bórrala.' : ''));
+    if (e.target.value && !claveValida()) marcar(e.target, mensajeClave());
   });
 
   // Foto desde galería: se reduce a máx. 1000 px (límite de imágenes de Google Sheets)
@@ -542,6 +565,7 @@
       apellidos: $('apellidos').value.trim(),
       telefono: $('telefono').value,
       telefonoConfirmacion: $('telefono2').value,
+      correo: $('correo').value.trim().toLowerCase(),
       tipoBoleto: $('tipoBoleto').value,
       tipoPago: $('tipoPago').value,
       cantidad: Number($('cantidad').value),
@@ -700,7 +724,7 @@
   // ───── Comprar otro boleto ─────
   // Limpia el formulario sin recargar la página
   function reiniciarFormulario(){
-    ['nombres','apellidos','telefono','telefono2','clave'].forEach(id => { $(id).value = ''; marcar($(id), ''); });
+    ['nombres','apellidos','telefono','telefono2','correo','clave'].forEach(id => { $(id).value = ''; marcar($(id), ''); });
     $('tipoBoleto').value = '';
     $('tipoPago').value = '';
     llenarCantidad();
@@ -724,6 +748,7 @@
 
     $('acepta').checked = false;
     $('aceptaWa').checked = false;
+    avisoTransfAceptado = false;
     mostrarVista('portal');
     window.scrollTo(0, 0);
     actualizarEstado();
