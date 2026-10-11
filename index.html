@@ -226,14 +226,14 @@
       <details id="sec4">
         <summary><span class="paso">4</span>Comprobante<span class="flecha">▾</span></summary>
         <div class="cuerpo">
-          <p class="ayuda">Necesitas los dos: la clave y la foto de tu comprobante.</p>
+          <p class="ayuda">Solo necesitas uno de los dos: la clave o la foto de tu comprobante.</p>
 
           <label for="clave" id="claveLabel">Por favor ingresa la clave de rastreo de tu pago</label>
           <input id="clave" maxlength="18" autocomplete="off" spellcheck="false" style="text-transform:uppercase">
           <div class="contador"><span id="cuenta">0</span> / <span id="limite">18</span></div>
           <div class="msg"></div>
 
-          <div class="separador">y</div>
+          <div class="separador">o bien</div>
 
           <label class="subir" id="subirBox">
             <input type="file" id="foto" accept="image/*">
@@ -357,7 +357,9 @@
 
   // Sección 4 completa: clave válida Y foto del comprobante.
   function validarSec4(){
-    return claveValida() && !!foto;
+    const hayClave = $('clave').value.trim() !== '';
+    if (hayClave && !claveValida()) return false;
+    return hayClave || !!foto;
   }
 
   function actualizarEstado(){
@@ -498,7 +500,7 @@
     actualizarEstado();
   });
   $('clave').addEventListener('blur', e => {
-    if (e.target.value && !claveValida()) marcar(e.target, mensajeClave());
+    if (e.target.value && !claveValida()) marcar(e.target, mensajeClave() + (foto ? ' Complétala o bórrala.' : ''));
   });
 
   // Foto desde galería: se reduce a máx. 1000 px (límite de imágenes de Google Sheets)
