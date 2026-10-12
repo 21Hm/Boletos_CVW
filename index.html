@@ -228,9 +228,9 @@
         <div class="cuerpo">
           <p class="ayuda">Solo necesitas uno de los dos: la clave o la foto de tu comprobante.</p>
 
-          <label for="clave" id="claveLabel">Por favor ingresa la clave de rastreo de tu pago</label>
-          <input id="clave" maxlength="18" autocomplete="off" spellcheck="false" style="text-transform:uppercase">
-          <div class="contador"><span id="cuenta">0</span> / <span id="limite">18</span></div>
+          <label for="clave" id="claveLabel">Por favor ingresa la clave de rastreo de tu pago, completa y sin recortarla</label>
+          <input id="clave" maxlength="30" autocomplete="off" spellcheck="false" style="text-transform:uppercase">
+          <div class="contador"><span id="cuenta">0</span> / <span id="limite">30</span></div>
           <div class="msg"></div>
 
           <div class="separador">o bien</div>
@@ -302,7 +302,7 @@
 
   let PRECIOS = null;   // llegan del servidor según la etapa vigente
   let cotizacion = null; // etapa con la que se le mostró el precio al comprador
-  const LONGITUD_CLAVE = 18;       // CODI, transferencia, efectivo
+  const CLAVE_MIN = 6, CLAVE_MAX = 30; // CODI y transferencia: longitud variable, se captura completa
   const LONGITUD_ORDEN_CLIP = 12;  // tarjeta (CLIP)
   const LEYENDA_CLIP = 'Serás redireccionado a la página de CLIP. Al realizar tu pago, da clic en VER RECIBO, copia el número de ORDEN y regresa aquí para terminar tu orden de compra.';
   const $ = id => document.getElementById(id);
@@ -344,15 +344,15 @@
 
   // Reglas de la clave según el tipo de pago
   const esTarjeta = () => $('tipoPago').value === 'TARJETA';
-  const limiteClave = () => esTarjeta() ? LONGITUD_ORDEN_CLIP : LONGITUD_CLAVE;
+  const limiteClave = () => esTarjeta() ? LONGITUD_ORDEN_CLIP : CLAVE_MAX;
   function claveValida(){
     const v = $('clave').value.trim().toUpperCase();
     return esTarjeta() ? new RegExp('^\\d{' + LONGITUD_ORDEN_CLIP + '}$').test(v)
-                       : new RegExp('^[A-Z0-9]{' + LONGITUD_CLAVE + '}$').test(v);
+                       : new RegExp('^[A-Z0-9]{' + CLAVE_MIN + ',' + CLAVE_MAX + '}$').test(v);
   }
   function mensajeClave(){
     return esTarjeta() ? 'El número de ORDEN debe tener ' + LONGITUD_ORDEN_CLIP + ' dígitos.'
-                       : 'La clave debe tener ' + LONGITUD_CLAVE + ' caracteres.';
+                       : 'Copia la clave completa, tal como aparece en tu comprobante (mínimo ' + CLAVE_MIN + ' caracteres).';
   }
 
   // Sección 4 completa: clave válida Y foto del comprobante.
@@ -484,7 +484,7 @@
     const clave = $('clave');
     $('claveLabel').textContent = esTarjeta()
       ? 'Por favor ingresa el número de ORDEN de tu pago con CLIP'
-      : 'Por favor ingresa la clave de rastreo de tu pago';
+      : 'Por favor ingresa la clave de rastreo de tu pago, completa y sin recortarla';
     clave.maxLength = limiteClave();
     clave.inputMode = esTarjeta() ? 'numeric' : 'text';
     $('limite').textContent = limiteClave();
@@ -630,9 +630,7 @@
   }
   function htmlEfectivo(){
     return '<p class="aviso">El pago en efectivo no está disponible en este portal de autoservicio. ' +
-      'Para completar tu compra en línea elige CODI, transferencia o tarjeta.' +
-      (contacto ? ' Si necesitas pagar en efectivo, comunícate al:' : '') + '</p>' +
-      (contacto ? '<div class="contacto-box">' + htmlContacto() + '</div>' : '');
+      'Para completar tu compra en línea elige CODI, transferencia o tarjeta.</p>';
   }
 
   // Links de PROYECCION J11:J13
