@@ -606,7 +606,7 @@
   }
 
   // ───── Etapa de venta ─────
-  const NOMBRES_ETAPA = { 1: 'Preventa', 2: 'Preferente', 3: 'Regular' };
+  const NOMBRES_ETAPA = { 1: 'Preventa', 2: 'Preferente', 3: 'Venta general' };
   const DOCE_HORAS = 12 * 60 * 60 * 1000;
   let desfaseReloj = 0;   // diferencia entre la hora del servidor y la del dispositivo
   let contacto = '';
@@ -665,7 +665,8 @@
     $('avisoTexto').textContent = textos.p;
     $('avisoContacto').innerHTML = textos.c ? htmlContacto() : '';
     proximoInicio = r.proximoInicio || null;
-    $('crTitulo').textContent = r.proximaEtapa ? 'La etapa ' + NOMBRES_ETAPA[r.proximaEtapa] + ' inicia en' : '';
+    const TITULOS_CUENTA = { 1: 'La Preventa inicia en', 2: 'La etapa Preferente inicia en', 3: 'La Venta general inicia en' };
+    $('crTitulo').textContent = r.proximaEtapa ? TITULOS_CUENTA[r.proximaEtapa] : '';
     mostrarVista('avisoVenta');
     iniciarReloj();
   }
