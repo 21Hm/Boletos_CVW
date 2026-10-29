@@ -47,6 +47,13 @@
   .etapa{display:inline-block;margin-top:16px;background:var(--marino);color:#fff;font-weight:700;font-size:.95rem;letter-spacing:.03em;padding:6px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.14)}
   .etapa:empty{display:none}
   .instrucciones{margin:12px 0 0;color:#fff}
+  .ubicacion{margin-top:18px;text-align:center}
+  .ubicacion iframe{display:block;width:100%;height:260px;border:0;border-radius:10px;background:#16161a}
+  .ubicacion .ubicacion-txt{margin:12px 0;color:#fff;font-weight:600}
+  .btn-mapa{display:inline-block;background:var(--oro);color:#111;font-weight:800;text-decoration:none;padding:12px 26px;border-radius:999px}
+  .cierre{margin:14px auto 0;max-width:340px;border:1.5px solid rgba(201,162,39,.6);border-radius:10px;padding:10px 14px;background:rgba(201,162,39,.08)}
+  .cierre p{margin:0 0 4px;font-size:.9rem;color:var(--suave)}
+  .cierre strong{display:block;font-size:1.7rem;font-weight:800;color:var(--oro);font-variant-numeric:tabular-nums;letter-spacing:.02em;line-height:1.15}
 
   /* ── Paneles con transparencia ── */
   .panel, details{background:var(--panel);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
@@ -141,11 +148,15 @@
     <span class="logo-texto" id="logoTexto" hidden>Cheveween 2</span>
     <ul class="evento" aria-label="Datos del evento">
       <li class="fecha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Viernes 30 de octubre de 2026</li>
-      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span><a href="https://www.google.com/maps/search/?api=1&amp;query=Quinta+Las+Cruces+Fraccionamiento+Las+Am%C3%A9ricas+M%C3%A9rida" target="_blank" rel="noopener">Quinta Las Cruces</a>, en la entrada del Fracc. Las Américas</span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span><a href="https://maps.app.goo.gl/MAynpehY9frUTxm1A" target="_blank" rel="noopener">Quinta Las Cruces</a>, en la entrada del Fracc. Las Américas</span></li>
       <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Apertura de puertas: 9:00 p.m.</li>
     </ul>
     <div><span class="etapa" id="etapaTxt"></span></div>
     <p class="instrucciones" id="instrucciones" hidden>Llena las cuatro secciones y presiona Terminar.</p>
+    <div class="cierre" id="cierreBox" hidden aria-live="off">
+      <p>La venta cierra en</p>
+      <strong id="cierreReloj">--:--:--</strong>
+    </div>
   </header>
 
   <!-- Cargando -->
@@ -159,6 +170,11 @@
     <h2 id="avisoTitulo"></h2>
     <p id="avisoTexto"></p>
     <div class="contacto-box" id="avisoContacto"></div>
+    <div class="ubicacion" id="avisoMapa" hidden>
+      <iframe id="mapaEvento" title="Mapa: Quinta Las Cruces, Fracc. Las Américas" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <p class="ubicacion-txt">Quinta Las Cruces, en la entrada del Fracc. Las Américas</p>
+      <a class="btn-mapa" href="https://maps.app.goo.gl/MAynpehY9frUTxm1A" target="_blank" rel="noopener">Cómo llegar</a>
+    </div>
     <div class="cuenta-regresiva" id="cuentaRegresiva" hidden aria-live="off">
       <h3 id="crTitulo"></h3>
       <div class="reloj">
@@ -621,9 +637,29 @@
     calcularTotales();
   }
 
+  // ───── Cuenta regresiva para el cierre de la venta (solo en la página) ─────
+  // Hora de Mérida (UTC-6). Usa la hora del servidor para no depender del reloj del celular.
+  const CIERRE_VENTA = new Date('2026-10-29T23:59:59-06:00').getTime();
+  let tickerCierre = null;
+  function actualizarCierre(){
+    const restante = CIERRE_VENTA - (Date.now() + desfaseReloj);
+    const visible = !$('portal').hidden && restante > 0;
+    $('cierreBox').hidden = !visible;
+    if (!visible){
+      clearInterval(tickerCierre); tickerCierre = null;
+      if (!$('portal').hidden && restante <= 0 && !infoPagoCargada) mostrarAviso({ estado: 'cerrada' });
+      return;
+    }
+    const seg = Math.ceil(restante / 1000), dos = n => String(n).padStart(2, '0');
+    const d = Math.floor(seg / 86400), h = Math.floor(seg % 86400 / 3600);
+    $('cierreReloj').textContent = (d ? d + 'd ' : '') + dos(h) + ':' + dos(Math.floor(seg % 3600 / 60)) + ':' + dos(seg % 60);
+    if (!tickerCierre) tickerCierre = setInterval(actualizarCierre, 1000);
+  }
+
   function mostrarVista(v){
     ['cargando','portal','avisoVenta','exito'].forEach(id => { $(id).hidden = id !== v; });
     $('instrucciones').hidden = v !== 'portal';
+    actualizarCierre();
     if (v === 'avisoVenta' || v === 'cargando') $('etapaTxt').textContent = '';
   }
 
@@ -659,9 +695,11 @@
       antes:   { t: 'La venta de boletos aún no comienza', p: 'Muy pronto podrás comprar tus boletos aquí.', c: false },
       entre:   { t: 'La etapa de venta ha terminado',
                  p: 'Si quieres adquirir boletos, por favor espera más información.', c: false },
-      cerrada: { t: 'La venta en línea ha cerrado',
-                 p: 'Gracias por tu interés.', c: false }
+      cerrada: { t: 'La compra digital de boletos ha terminado',
+                 p: 'Habrá boletos disponibles en la entrada del evento a partir de las 8:00 p.m.', c: false, mapa: true }
     }[r.estado];
+    $('avisoMapa').hidden = !textos.mapa;
+    if (textos.mapa && !$('mapaEvento').src) $('mapaEvento').src = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.3810580975364!2d-89.6445777!3d21.0574375!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8f5675b81d98b0b1%3A0x5d68ae9278ec87de!2sQuinta%20Las%20Cruces!5e0!3m2!1ses-419!2smx!4v1793294318836!5m2!1ses-419!2smx';
     $('avisoTitulo').textContent = textos.t;
     $('avisoTexto').textContent = textos.p;
     $('avisoContacto').innerHTML = textos.c ? htmlContacto() : '';
@@ -705,6 +743,8 @@
         contacto = r.contacto || '';
         aplicarLegales(r.legales);
         if (!$('exito').hidden) return; // no interrumpir la pantalla de compra registrada
+        // Pasada la hora de cierre, la página se cierra aunque el servidor tarde unos segundos en hacerlo
+        if (r.abierta && r.ahora >= CIERRE_VENTA && !infoPagoCargada) r = { estado: 'cerrada' };
         if (r.abierta){
           clearInterval(ticker); ticker = null; reintentos = 0;
           aplicarEtapa(r.etapa, r.precios);
